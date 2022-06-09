@@ -1,0 +1,14 @@
+{% extends '../../store/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+<h4 class="fw-50">Your Dashboard</h4>
+    <h5 class="fw-50">Hello, {{request.user|title}}</h5>
+    <div class="text-end">
+        <a class="px-4"href="{% url 'basket:basket_summary' %}">My Order</a>
+        <a href="{% url 'account:edit-profile' %}"> Update Profile</a>
+    </div>
+   
+</div>
+
+{% endblock %}

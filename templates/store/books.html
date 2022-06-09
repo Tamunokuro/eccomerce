@@ -1,0 +1,57 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block title %}Books{% endblock %}
+
+{% block content %}
+<div class="album py-5 bg-light">
+    <div class="container">
+      <div class=pb-3 h5>All Books</div>
+      <ul>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              Sort By
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+             {% for c in categories %}
+              <li {% if category.slug == c.slug %}class="selected" {% endif %}>
+                  <a class="dropdown-item" href="{{ c.book_get_absolute_url }}">{{ c.name|title }}</a>
+              </li>
+              {% endfor %}
+          </ul>
+      </li>
+      </ul>
+
+
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5 g-3">
+
+        {% for book in mybooks %}
+
+        <div class="col">
+          <div class="card shadow-sm">
+           
+            <div class="card-body">
+              <img class="img-fluid" alt="Responsive image" src="{{ book.image.url }}">
+              <p class="card-text">
+               
+                <h5><a class="text-dark text-decoration-none" href="{{ book.get_absolute_url }}">{{ book|title }}</a></h5>
+              
+                <small class="text-muted justify-content-right"> 9min read</small>
+              </p>
+              <div class="d-flex justify-content-between align-items-center">
+                <p class="card-text">
+                  <a class="text-dark text-decoration-none" href="">{{ book.description|slice:80 }}...</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% endfor %}
+
+    
+
+      </div>
+
+</div>
+{% endblock %}

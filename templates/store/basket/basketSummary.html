@@ -1,0 +1,130 @@
+{% extends '../base.html' %}
+{% load static %}
+{% block title %}Basket Summary{% endblock %}
+
+{% block content %}
+<main class="pt-5">
+    <div class="container">
+      <h1 class="h5">Shopping basket</h1>
+      <div class="row g-3">
+        <div class="col-12 bg-light mb-3 p-3 d-flex justify-content-between">
+          <div class="d-flex d-flex-inline">
+            {% with totalQty=basket|length %}
+            {% if totalQty > 0 %}
+            <div class="pe-3 fw-bold" id="basket_qty">Order Summary({{ totalQty }})</div> 
+                        
+                          {% else %}
+                          <div class="pe-3 fw-bold" id="basket_qty">Order Summary(0)</div>
+                          {% endif %}
+                      </div>
+                      {% endwith %}
+
+                      <div class="text-end">
+            
+                        <!-- <div class="">Sub Total: <span class="fw-bold">£</span><div id="subtotal" class="d-inline-flex fw-bold">{{basket.get_subtotal_price}}</div></div>
+                        <div id="">Shipping <span class="small">(Next day delivery)</span>: <span class="fw-bold">£11.50</span></div> -->
+                        <div class="pe-3 fw-bold">Address:</div>
+                        <div class="pe-3 fw-bold" id="form-address">{{ request.user.address1 }}, {{ request.user.towncity }}</div>
+                        <div class="p-2">Total to pay: <span class="fw-bold h5">£</span><span id="subtotal" class="fw-bold h5">{{basket.get_total_price}}</span></div>
+                        <a role="button" href="" class="btn btn-primary fw-bold" type="button">Checkout</a>
+                      </div>
+           
+          </div>
+          
+        </div>
+      {% for item in basket %}
+      {% with singleBook=item.singleBook %}
+      <div data-index="{{singleBook.id}}" class="col-12 bg-light p-3 d-flex justify-content-between singleBook-item">
+        <div class="col-md-3 col-lg-2 order-md-first bg-light">
+          <img class="img-fluid mx-auto d-block" width="120px" alt="Responsive image" src="{{ singleBook.image.url }}">
+        </div>
+        <div class="col-md-9 col-lg-10 ps-md-3 ps-lg-10">
+          <a href="{{ singleBook.get_absolute_url }}" class="text-decoration-none text-reset">
+            <h1 class="h5 pt-2">{{ singleBook.title }}</h1>
+          </a>
+        
+            <div class="col">
+              <div class="row p-3">
+                <div class="col-6 fw-bold">Hardback Book</div>
+                <div class="col-6 text-end"><span class="h6 fw-bold">£{{ singleBook.price }}</span></div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="row p-3">
+                <div class="col-12">
+                  <label for="select">Qty</label>
+                  <select id="select{{singleBook.id}}">
+                    <option selected>
+                      {{item.qty}}
+                    </option>
+                    <option value="">1</option>
+                    <option value="">2</option>
+                    <option value="">3</option>
+                    <option value="">4</option>
+                  </select>
+                  <button type="button" id="update-button" data-index="{{singleBook.id}}"
+                    class="btn btn-outline-secondary btn-sm update-button">
+                    Update
+                  </button>
+                  <button type="button" id="delete-button" data-index="{{singleBook.id}}"
+                    class="btn btn-outline-secondary btn-sm delete-button">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          
+        </div>
+      </div>
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </main>
+
+  <script>
+    //Delete Book
+      $(document).on('click', '.delete-button', function (e){
+          e.preventDefault()
+          var bkid = $(this).data('index');
+          $.ajax({
+              type: "POST",
+              url: "{% url 'basket:basket_delete' %}",
+              data: {
+                   singleBookid: $(this).data('index'),
+                   csrfmiddlewaretoken: "{{csrf_token}}",
+                   action: 'post'
+                },
+                success: function (json){
+                  $('.singleBook-item[data-index="' + bkid + '"]').remove();
+                  document.getElementById("subtotal").innerHTML = json.subtotal;
+                  document.getElementById("basket_qty").innerHTML = json.qty
+                  window.location.reload();
+                },
+                error: function (xhr, errmsg, err) {}
+             })
+      })
+
+      //Update Book
+      $(document).on('click', '.update-button', function (e) {
+        e.preventDefault();
+        var bkid = $(this).data('index');
+        $.ajax({
+          type: 'POST',
+          url: '{% url "basket:basket_update" %}',
+          data: {
+            singleBookid: $(this).data('index'),
+            singleBookqty: $('#select' + bkid + ' option:selected').text(),
+            csrfmiddlewaretoken: "{{csrf_token}}",
+            action: 'post'
+          },
+          success: function (json) {
+            document.getElementById("basket_qty").innerHTML = json.qty
+            document.getElementById("subtotal").innerHTML = json.total
+            window.location.reload();
+          },
+        error: function (xhr, errmsg, err) {}
+    });
+  })
+  </script>
+
+{% endblock %}
